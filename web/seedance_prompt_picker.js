@@ -155,9 +155,8 @@ function injectStyles() {
   document.head.appendChild(style);
 }
 
-function isSeedancePromptNode(node) {
-  const name = String(node?.comfyClass || node?.type || node?.title || "");
-  return /SeedancePromptPickerHelper|Seedance.*PE|Seedance2DPE|Seedance.*Prompt|Seedance.*Generate/i.test(name);
+function isHelperNode(node) {
+  return String(node?.comfyClass || "") === "SeedancePromptPickerHelper";
 }
 
 function findPromptWidget(node) {
@@ -220,12 +219,6 @@ function nodeLabel(node) {
   return String(node?.title || node?.comfyClass || node?.type || `Node ${node?.id || ""}`);
 }
 
-function getResourceNode(peNode) {
-  const resourceInput = peNode?.inputs?.find((input) => /resources?/i.test(String(input.name || "")));
-  const link = getLink(resourceInput?.link);
-  return getNodeById(link?.origin_id);
-}
-
 function collectFromResourceNode(resourceNode) {
   if (!resourceNode?.inputs) return [];
 
@@ -266,13 +259,9 @@ function collectVisibleImageNodes(peNode) {
 }
 
 function collectReferences(peNode) {
-  if (String(peNode?.comfyClass || "") === "SeedancePromptPickerHelper") {
-    const ownRefs = collectFromResourceNode(peNode);
-    if (ownRefs.length) return ownRefs;
-  }
+  if (!isHelperNode(peNode)) return [];
 
-  const resourceNode = getResourceNode(peNode);
-  const refs = collectFromResourceNode(resourceNode);
+  const refs = collectFromResourceNode(peNode);
   return refs.length ? refs : collectVisibleImageNodes(peNode);
 }
 
@@ -633,7 +622,7 @@ function enhancePromptWidget(node, widget) {
 }
 
 function setupNode(node) {
-  if (!isSeedancePromptNode(node)) return;
+  if (!isHelperNode(node)) return;
 
   const widget = findPromptWidget(node);
   if (!widget) return;
@@ -674,13 +663,13 @@ function findNodeForTextarea(textarea) {
   const point = canvasPointFromElement(textarea);
 
   const containing = nodes
-    .filter((node) => isSeedancePromptNode(node) && nodeContainsPoint(node, point))
+    .filter((node) => isHelperNode(node) && nodeContainsPoint(node, point))
     .sort((a, b) => (b.id || 0) - (a.id || 0));
 
   if (containing.length) return containing[0];
 
   return nodes.find((node) => {
-    if (!isSeedancePromptNode(node)) return false;
+    if (!isHelperNode(node)) return false;
     const widget = findPromptWidget(node);
     return widget && String(widget.value || "") === String(textarea.value || "");
   });
