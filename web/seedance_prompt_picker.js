@@ -540,7 +540,7 @@ function showHelpPanel() {
     "1. 同一批参考图要同时接到原 Seedance 资源节点和本 Helper 的 Resources 输入口。",
     "2. 两边顺序必须一致：Resources_0 对应 <code>图片1</code>，Resources_1 对应 <code>图片2</code>。",
     "3. 在 prompt 需要引用的位置输入 <code>@</code>，选择图片后会插入 <code>（图片1）</code>。",
-    "4. 例如写 <code>@角色1@</code> 后选择图片1，会变成 <code>@角色1（图片1）</code>。",
+    "4. 例如 <code>角色1@</code> 后选择图片1，会变成 <code>角色1（图片1）</code>。",
     "5. 本 Helper 只输出 Seedance 能读的 prompt 文本；图片仍由原 Seedance 资源节点提供。",
   ].join("<br>");
 

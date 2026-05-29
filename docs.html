@@ -7,14 +7,20 @@
     <style>
       :root {
         color-scheme: dark;
-        --bg: #111317;
-        --panel: #1b1f26;
-        --panel-2: #232832;
-        --text: #eef2f7;
-        --muted: #aeb8c6;
-        --line: #394150;
-        --accent: #4c8dff;
-        --warn: #ffd166;
+        --bg: #090b10;
+        --surface: #11151d;
+        --surface-2: #171d27;
+        --surface-3: #202734;
+        --line: rgba(167, 188, 214, 0.18);
+        --line-strong: rgba(167, 188, 214, 0.34);
+        --text: #f4f7fb;
+        --muted: #a9b5c5;
+        --subtle: #768397;
+        --blue: #68a7ff;
+        --cyan: #72e5d1;
+        --gold: #e8c476;
+        --rose: #f19ca7;
+        --shadow: 0 24px 80px rgba(0, 0, 0, 0.52);
       }
 
       * {
@@ -23,176 +29,393 @@
 
       body {
         margin: 0;
-        background: var(--bg);
+        background:
+          radial-gradient(circle at 18% 8%, rgba(104, 167, 255, 0.16), transparent 28%),
+          radial-gradient(circle at 82% 4%, rgba(114, 229, 209, 0.10), transparent 26%),
+          linear-gradient(180deg, #0d1118 0%, var(--bg) 48%, #07090d 100%);
         color: var(--text);
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-        line-height: 1.7;
+        font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", sans-serif;
+        line-height: 1.72;
       }
 
       main {
-        max-width: 920px;
+        width: min(1120px, calc(100vw - 40px));
         margin: 0 auto;
-        padding: 40px 22px 56px;
+        padding: 52px 0 68px;
+      }
+
+      h1,
+      h2,
+      h3,
+      p {
+        margin: 0;
       }
 
       h1 {
-        margin: 0 0 10px;
-        font-size: 32px;
-        line-height: 1.2;
+        max-width: 760px;
+        font-size: clamp(34px, 5vw, 62px);
+        line-height: 1.05;
+        letter-spacing: 0;
       }
 
       h2 {
-        margin: 32px 0 12px;
-        font-size: 22px;
+        margin-bottom: 14px;
+        font-size: 24px;
+        letter-spacing: 0;
       }
 
-      p {
-        margin: 10px 0;
-        color: var(--muted);
+      h3 {
+        margin-bottom: 8px;
+        font-size: 15px;
+        color: var(--text);
       }
 
-      .lead {
-        font-size: 17px;
-      }
-
-      .panel {
-        margin: 18px 0;
-        padding: 18px;
-        border: 1px solid var(--line);
-        border-radius: 8px;
-        background: var(--panel);
-      }
-
-      .warning {
-        border-color: rgba(255, 209, 102, 0.55);
-        background: rgba(255, 209, 102, 0.08);
-      }
-
-      ol,
-      ul {
-        margin: 10px 0 0 22px;
-        padding: 0;
-        color: var(--muted);
-      }
-
+      p,
       li {
-        margin: 8px 0;
+        color: var(--muted);
       }
 
       code {
         padding: 2px 6px;
-        border-radius: 5px;
-        background: #0d0f13;
+        border: 1px solid rgba(167, 188, 214, 0.14);
+        border-radius: 6px;
+        background: rgba(3, 6, 10, 0.72);
         color: #ffffff;
         font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
         font-size: 0.94em;
       }
 
       pre {
+        margin: 10px 0 0;
         overflow: auto;
-        padding: 14px;
+        padding: 14px 16px;
         border: 1px solid var(--line);
         border-radius: 8px;
-        background: #0d0f13;
+        background: rgba(3, 6, 10, 0.78);
       }
 
       pre code {
         padding: 0;
+        border: 0;
         background: transparent;
+        white-space: pre-wrap;
       }
 
-      .grid {
+      .hero {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        grid-template-columns: minmax(0, 1.08fr) minmax(320px, 0.72fr);
+        gap: 28px;
+        align-items: stretch;
+        margin-bottom: 34px;
+      }
+
+      .hero-copy {
+        padding: 34px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: linear-gradient(145deg, rgba(23, 29, 39, 0.94), rgba(14, 18, 25, 0.9));
+        box-shadow: var(--shadow);
+      }
+
+      .eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 18px;
+        color: var(--cyan);
+        font-size: 13px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .eyebrow::before {
+        content: "";
+        width: 8px;
+        height: 8px;
+        border-radius: 999px;
+        background: var(--cyan);
+        box-shadow: 0 0 18px rgba(114, 229, 209, 0.7);
+      }
+
+      .lead {
+        max-width: 720px;
+        margin-top: 18px;
+        font-size: 17px;
+        color: #c5cfdd;
+      }
+
+      .install {
+        padding: 22px;
+        border: 1px solid var(--line-strong);
+        border-radius: 8px;
+        background: rgba(17, 21, 29, 0.88);
+        box-shadow: var(--shadow);
+      }
+
+      .install-row {
+        display: grid;
+        gap: 8px;
+        margin-top: 14px;
+      }
+
+      .label {
+        color: var(--subtle);
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .section {
+        margin-top: 24px;
+        padding: 24px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: rgba(17, 21, 29, 0.72);
+      }
+
+      .warning {
+        border-color: rgba(232, 196, 118, 0.52);
+        background: linear-gradient(135deg, rgba(232, 196, 118, 0.13), rgba(17, 21, 29, 0.72));
+      }
+
+      .warning strong {
+        color: var(--gold);
+      }
+
+      .steps {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
         gap: 14px;
       }
 
-      .card {
-        padding: 16px;
+      .step,
+      .map-card {
+        padding: 18px;
         border: 1px solid var(--line);
         border-radius: 8px;
-        background: var(--panel-2);
+        background: var(--surface-2);
       }
 
-      .card strong {
+      .step-number {
+        display: inline-grid;
+        place-items: center;
+        width: 30px;
+        height: 30px;
+        margin-bottom: 12px;
+        border-radius: 999px;
+        background: rgba(104, 167, 255, 0.18);
+        color: var(--blue);
+        font-weight: 800;
+      }
+
+      .mapping {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 12px;
+      }
+
+      .map-card strong {
+        display: block;
         color: var(--text);
       }
 
-      a {
-        color: var(--accent);
+      .map-card span {
+        color: var(--muted);
+      }
+
+      .example {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 14px;
+      }
+
+      .example-box {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--surface);
+        overflow: hidden;
+      }
+
+      .example-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 12px 14px;
+        border-bottom: 1px solid var(--line);
+        background: var(--surface-3);
+      }
+
+      .tag {
+        display: inline-flex;
+        align-items: center;
+        min-height: 24px;
+        padding: 0 9px;
+        border-radius: 999px;
+        background: rgba(104, 167, 255, 0.14);
+        color: #dbeafe;
+        font-size: 12px;
+        font-weight: 700;
+      }
+
+      .callout {
+        color: var(--cyan);
+      }
+
+      .footer-note {
+        margin-top: 18px;
+        color: var(--subtle);
+        font-size: 13px;
+      }
+
+      @media (max-width: 860px) {
+        main {
+          width: min(100vw - 24px, 680px);
+          padding-top: 24px;
+        }
+
+        .hero,
+        .steps,
+        .mapping {
+          grid-template-columns: 1fr;
+        }
+
+        .hero-copy,
+        .install,
+        .section {
+          padding: 18px;
+        }
       }
     </style>
   </head>
   <body>
     <main>
-      <h1>seedance2.0 @ picker helper 使用说明</h1>
-      <p class="lead">这是一个 ComfyUI 辅助节点，用来在 prompt 里输入 <code>@</code> 时弹出参考图缩略图，点选后自动插入 Seedance2.0 能识别的图片引用文本。</p>
+      <section class="hero">
+        <div class="hero-copy">
+          <div class="eyebrow">ComfyUI custom node</div>
+          <h1>seedance2.0 @ picker helper</h1>
+          <p class="lead">在 prompt 里输入 <code>@</code>，弹出已连接参考图的缩略图，点选后插入 Seedance2.0 能读的 <code>（图片1）</code> 引用文本。</p>
+        </div>
 
-      <section class="panel warning">
-        <strong>重要边界</strong>
-        <p>这个 helper 不会替代原来的 Seedance2.0 资源节点，也不会自己把图片发送给 Seedance。它只负责写 prompt 文本，例如 <code>（图片1）</code>。真正给 Seedance2.0 读取的参考图，仍然必须接到原来的 <code>Seedance2DResource</code> 或你的原资源节点上。</p>
+        <aside class="install">
+          <h2>安装信息</h2>
+          <div class="install-row">
+            <div class="label">URL</div>
+            <pre><code>https://github.com/oyuz/seedance_prompt_picker.git</code></pre>
+          </div>
+          <div class="install-row">
+            <div class="label">Commit</div>
+            <pre><code>以本次发布回复中的 Commit 为准</code></pre>
+          </div>
+          <p class="footer-note">安装后重启 ComfyUI，并强刷新浏览器页面，避免旧 JS 缓存残留。</p>
+        </aside>
       </section>
 
-      <h2>安装信息</h2>
-      <div class="panel">
-        <p>URL:</p>
-        <pre><code>https://github.com/oyuz/seedance_prompt_picker.git</code></pre>
-        <p>安装后重启 ComfyUI，并刷新浏览器页面。</p>
-      </div>
+      <section class="section warning">
+        <strong>先看这个边界</strong>
+        <p>helper 不会替代原 Seedance2.0 资源节点，也不会自己把图片发送给 Seedance。它负责生成 prompt 文本；真正的参考图仍然要接到原来的 <code>Seedance2DResource</code> 或你的原资源节点上。</p>
+      </section>
 
-      <h2>节点怎么接</h2>
-      <ol>
-        <li>打开你的 Seedance2.0 工作流。</li>
-        <li>添加节点 <code>seedance2.0 @ picker helper</code>。</li>
-        <li>把参考图接到原来的 Seedance2.0 资源节点，这是给 Seedance 真正使用的图片。</li>
-        <li>把同一批参考图、同样顺序，再接到 <code>seedance2.0 @ picker helper</code> 的 <code>Resources_0</code>、<code>Resources_1</code>、<code>Resources_2</code> 等输入口。</li>
-        <li>把 helper 的 <code>prompt</code> 输出接到原 <code>Seedance2DPE</code> 的 <code>prompt</code> 输入。</li>
-        <li>之后在 helper 的 prompt 文本框里写提示词。</li>
-      </ol>
-
-      <h2>图片顺序规则</h2>
-      <div class="grid">
-        <div class="card">
-          <strong>Resources_0</strong>
-          <p>对应 prompt 里的 <code>图片1</code></p>
+      <section class="section">
+        <h2>节点连接方式</h2>
+        <div class="steps">
+          <div class="step">
+            <div class="step-number">1</div>
+            <h3>保持原链路</h3>
+            <p>参考图继续接入原来的 Seedance2.0 资源节点，这是模型真正读取图片的地方。</p>
+          </div>
+          <div class="step">
+            <div class="step-number">2</div>
+            <h3>复制一份给 helper</h3>
+            <p>同一批图、同样顺序，再接到 <code>seedance2.0 @ picker helper</code> 的 <code>Resources_0</code>、<code>Resources_1</code> 等输入口。</p>
+          </div>
+          <div class="step">
+            <div class="step-number">3</div>
+            <h3>输出 prompt</h3>
+            <p>把 helper 的 <code>prompt</code> 输出接到原 <code>Seedance2DPE</code> 的 <code>prompt</code> 输入。</p>
+          </div>
         </div>
-        <div class="card">
-          <strong>Resources_1</strong>
-          <p>对应 prompt 里的 <code>图片2</code></p>
+      </section>
+
+      <section class="section">
+        <h2>图片顺序规则</h2>
+        <div class="mapping">
+          <div class="map-card">
+            <strong>Resources_0</strong>
+            <span>对应 <code>图片1</code></span>
+          </div>
+          <div class="map-card">
+            <strong>Resources_1</strong>
+            <span>对应 <code>图片2</code></span>
+          </div>
+          <div class="map-card">
+            <strong>Resources_2</strong>
+            <span>对应 <code>图片3</code></span>
+          </div>
+          <div class="map-card">
+            <strong>Resources_3</strong>
+            <span>对应 <code>图片4</code></span>
+          </div>
         </div>
-        <div class="card">
-          <strong>Resources_2</strong>
-          <p>对应 prompt 里的 <code>图片3</code></p>
+        <p class="footer-note">两边顺序必须一致。比如角色1在原资源节点里是第 1 张，它也要接到 helper 的 <code>Resources_0</code>。</p>
+      </section>
+
+      <section class="section">
+        <h2>使用方式</h2>
+        <div class="steps">
+          <div class="step">
+            <div class="step-number">1</div>
+            <h3>输入 @</h3>
+            <p>在需要引用图片的位置输入 <code>@</code>。</p>
+          </div>
+          <div class="step">
+            <div class="step-number">2</div>
+            <h3>选择缩略图</h3>
+            <p>弹窗可按住标题栏拖动，避免挡住 prompt。</p>
+          </div>
+          <div class="step">
+            <div class="step-number">3</div>
+            <h3>插入引用</h3>
+            <p>点选后会插入 <code>（图片1）</code> 这种带括号的引用。</p>
+          </div>
         </div>
-      </div>
-      <p>两边顺序必须一致。比如角色图在原 Seedance 资源节点里是第 1 张，那它也要接到 helper 的 <code>Resources_0</code>。</p>
+      </section>
 
-      <h2>怎么使用 @</h2>
-      <ol>
-        <li>在需要引用图片的位置输入 <code>@</code>。</li>
-        <li>弹出缩略图选择器。</li>
-        <li>如果弹窗挡住 prompt，可以按住弹窗标题栏拖到旁边。</li>
-        <li>点击对应图片。</li>
-        <li>helper 会插入带括号的引用，例如 <code>（图片1）</code>。</li>
-      </ol>
+      <section class="section">
+        <h2>示例</h2>
+        <div class="example">
+          <div class="example-box">
+            <div class="example-head">
+              <strong>原始 prompt</strong>
+              <span class="tag">先输入 @</span>
+            </div>
+            <pre><code>角色1@和角色2@牵着手在花园@里散步，角色1摘下一朵花@送给角色2</code></pre>
+          </div>
 
-      <h2>示例</h2>
-      <div class="panel">
-        <p>输入：</p>
-        <pre><code>@角色1@ 走进 @场景1@，手里拿着 @道具1@。</code></pre>
-        <p>依次选择图片后可能变成：</p>
-        <pre><code>@角色1（图片1） 走进 @场景1（图片3），手里拿着 @道具1（图片5）。</code></pre>
-      </div>
+          <div class="example-box">
+            <div class="example-head">
+              <strong>选择图片后</strong>
+              <span class="tag">Seedance 可读文本</span>
+            </div>
+            <pre><code>角色1（图片1）和角色2（图片2）牵着手在花园（图片3）里散步，角色1摘下一朵花（图片4）送给角色2</code></pre>
+          </div>
+        </div>
+        <p class="footer-note">上面的 <code>图片1</code>、<code>图片2</code>、<code>图片3</code>、<code>图片4</code> 分别对应 helper 的 <code>Resources_0</code> 到 <code>Resources_3</code>，并且要和原 Seedance 资源节点顺序一致。</p>
+      </section>
 
-      <h2>标题栏 i 按钮</h2>
-      <p>helper 节点标题栏右侧有一个蓝色 <code>i</code> 图标，点击后会在 ComfyUI 内显示简短用法说明。</p>
+      <section class="section">
+        <h2>Information 按钮</h2>
+        <p>helper 节点标题栏右侧有一个蓝色 <code>i</code> 图标。点击后会显示简短用法，其中示例为：<span class="callout">例如 <code>角色1@</code> 后选择图片1，会变成 <code>角色1（图片1）</code></span>。</p>
+      </section>
 
-      <h2>常见问题</h2>
-      <div class="panel">
-        <p><strong>输入 @ 没有弹窗：</strong>刷新页面或重启 ComfyUI；确认安装的是最新版本。</p>
-        <p><strong>弹窗有图，但 Seedance 没按图生成：</strong>检查同一张图是否也接到了原 Seedance2.0 资源节点，并且顺序一致。</p>
+      <section class="section">
+        <h2>常见问题</h2>
+        <p><strong>输入 @ 没有弹窗：</strong>重启 ComfyUI 后强刷新页面，确认安装的是最新 commit。</p>
+        <p><strong>弹窗有图，但 Seedance 没按图生成：</strong>检查图片是否也接到了原 Seedance2.0 资源节点，并且顺序一致。</p>
         <p><strong>为什么不是 Seedance 原生缩略图胶囊：</strong>独立 helper 拿不到原 Seedance2.0 私有富文本编辑器接口，所以采用稳定的 prompt 文本引用方式。</p>
-      </div>
+      </section>
     </main>
   </body>
 </html>
