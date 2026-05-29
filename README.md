@@ -9,6 +9,7 @@ It does not change the Seedance generation code. It only enhances the prompt wid
 - Adds an `@ 选择参考图` button to the Seedance prompt node when detected.
 - When the prompt value ends with `@`, opens a thumbnail picker.
 - Reads images connected to `Seedance2DResource` through `Resources_0`, `Resources_1`, etc.
+- The included `Seedance @ Picker Helper` node also has `Resources_0` to `Resources_11` image inputs, so you can use it as a standalone prompt helper.
 - Clicking a thumbnail inserts a token such as `图片1`, `图片2`, `场景1`, or `场景2` into the prompt.
 
 The `@` is only a trigger. The inserted text is the plain token that the existing Seedance node already understands.
@@ -25,12 +26,20 @@ Then restart ComfyUI and refresh the browser page.
 
 ## Use
 
+Recommended standalone helper flow:
+
 1. Open your existing Seedance2.0 workflow.
-2. Connect images into `Seedance2DResource`.
-3. Find the `Seedance2DPE` prompt box.
-4. Type `@` at the end of the prompt, or click `@ 选择参考图`.
-5. Choose a thumbnail.
-6. The helper inserts `图片1` / `场景1` style text into the prompt.
+2. Add `Seedance @ Picker Helper`.
+3. Connect the same reference images into both places:
+   - Your original `Seedance2DResource` node, so Seedance receives the images.
+   - `Seedance @ Picker Helper` `Resources_0`, `Resources_1`, etc., so the picker can show thumbnails.
+4. Connect `Seedance @ Picker Helper` `prompt` output to the `Seedance2DPE` prompt input.
+5. Type your prompt in `Seedance @ Picker Helper`.
+6. Type `@` at the end of the prompt, or click `@ 选择参考图`.
+7. Choose a thumbnail.
+8. The helper inserts `图片1` / `场景1` style text into the prompt.
+
+Keep the image order the same between `Seedance2DResource` and `Seedance @ Picker Helper`. For example, if the first image connected to `Seedance2DResource` is the character image, connect that same image to `Seedance @ Picker Helper` `Resources_0`.
 
 ## Notes
 

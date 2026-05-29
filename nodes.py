@@ -1,12 +1,17 @@
 class SeedancePromptPickerHelper:
-    """A tiny pass-through node so the extension is visible in ComfyUI."""
+    """Prompt helper with image inputs used by the frontend picker."""
 
     @classmethod
     def INPUT_TYPES(cls):
+        optional = {}
+        for index in range(12):
+            optional[f"Resources_{index}"] = ("IMAGE",)
+
         return {
             "required": {
                 "prompt": ("STRING", {"multiline": True, "default": ""}),
-            }
+            },
+            "optional": optional,
         }
 
     RETURN_TYPES = ("STRING",)
@@ -14,7 +19,7 @@ class SeedancePromptPickerHelper:
     FUNCTION = "run"
     CATEGORY = "utils/seedance"
 
-    def run(self, prompt):
+    def run(self, prompt, **kwargs):
         return (prompt,)
 
 

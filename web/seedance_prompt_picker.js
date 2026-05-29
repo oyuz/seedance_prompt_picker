@@ -143,7 +143,7 @@ function injectStyles() {
 
 function isSeedancePromptNode(node) {
   const name = String(node?.comfyClass || node?.type || node?.title || "");
-  return /Seedance.*PE|Seedance2DPE|Seedance.*Prompt|Seedance.*Generate/i.test(name);
+  return /SeedancePromptPickerHelper|Seedance.*PE|Seedance2DPE|Seedance.*Prompt|Seedance.*Generate/i.test(name);
 }
 
 function findPromptWidget(node) {
@@ -254,6 +254,11 @@ function collectVisibleImageNodes(peNode) {
 }
 
 function collectReferences(peNode) {
+  if (String(peNode?.comfyClass || "") === "SeedancePromptPickerHelper") {
+    const ownRefs = collectFromResourceNode(peNode);
+    if (ownRefs.length) return ownRefs;
+  }
+
   const resourceNode = getResourceNode(peNode);
   const refs = collectFromResourceNode(resourceNode);
   return refs.length ? refs : collectVisibleImageNodes(peNode);
