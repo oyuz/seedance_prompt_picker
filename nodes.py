@@ -28,5 +28,5 @@ NODE_CLASS_MAPPINGS = {
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
-    "SeedancePromptPickerHelper": "Seedance @ Picker Helper",
+    "SeedancePromptPickerHelper": "seedance2.0 @ picker helper",
 }

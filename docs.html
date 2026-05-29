@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>seedance2.0 @ picker helper 使用说明</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #111317;
+        --panel: #1b1f26;
+        --panel-2: #232832;
+        --text: #eef2f7;
+        --muted: #aeb8c6;
+        --line: #394150;
+        --accent: #4c8dff;
+        --warn: #ffd166;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        line-height: 1.7;
+      }
+
+      main {
+        max-width: 920px;
+        margin: 0 auto;
+        padding: 40px 22px 56px;
+      }
+
+      h1 {
+        margin: 0 0 10px;
+        font-size: 32px;
+        line-height: 1.2;
+      }
+
+      h2 {
+        margin: 32px 0 12px;
+        font-size: 22px;
+      }
+
+      p {
+        margin: 10px 0;
+        color: var(--muted);
+      }
+
+      .lead {
+        font-size: 17px;
+      }
+
+      .panel {
+        margin: 18px 0;
+        padding: 18px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--panel);
+      }
+
+      .warning {
+        border-color: rgba(255, 209, 102, 0.55);
+        background: rgba(255, 209, 102, 0.08);
+      }
+
+      ol,
+      ul {
+        margin: 10px 0 0 22px;
+        padding: 0;
+        color: var(--muted);
+      }
+
+      li {
+        margin: 8px 0;
+      }
+
+      code {
+        padding: 2px 6px;
+        border-radius: 5px;
+        background: #0d0f13;
+        color: #ffffff;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        font-size: 0.94em;
+      }
+
+      pre {
+        overflow: auto;
+        padding: 14px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: #0d0f13;
+      }
+
+      pre code {
+        padding: 0;
+        background: transparent;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 14px;
+      }
+
+      .card {
+        padding: 16px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--panel-2);
+      }
+
+      .card strong {
+        color: var(--text);
+      }
+
+      a {
+        color: var(--accent);
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>seedance2.0 @ picker helper 使用说明</h1>
+      <p class="lead">这是一个 ComfyUI 辅助节点，用来在 prompt 里输入 <code>@</code> 时弹出参考图缩略图，点选后自动插入 Seedance2.0 能识别的图片引用文本。</p>
+
+      <section class="panel warning">
+        <strong>重要边界</strong>
+        <p>这个 helper 不会替代原来的 Seedance2.0 资源节点，也不会自己把图片发送给 Seedance。它只负责写 prompt 文本，例如 <code>（图片1）</code>。真正给 Seedance2.0 读取的参考图，仍然必须接到原来的 <code>Seedance2DResource</code> 或你的原资源节点上。</p>
+      </section>
+
+      <h2>安装信息</h2>
+      <div class="panel">
+        <p>URL:</p>
+        <pre><code>https://github.com/oyuz/seedance_prompt_picker.git</code></pre>
+        <p>安装后重启 ComfyUI，并刷新浏览器页面。</p>
+      </div>
+
+      <h2>节点怎么接</h2>
+      <ol>
+        <li>打开你的 Seedance2.0 工作流。</li>
+        <li>添加节点 <code>seedance2.0 @ picker helper</code>。</li>
+        <li>把参考图接到原来的 Seedance2.0 资源节点，这是给 Seedance 真正使用的图片。</li>
+        <li>把同一批参考图、同样顺序，再接到 <code>seedance2.0 @ picker helper</code> 的 <code>Resources_0</code>、<code>Resources_1</code>、<code>Resources_2</code> 等输入口。</li>
+        <li>把 helper 的 <code>prompt</code> 输出接到原 <code>Seedance2DPE</code> 的 <code>prompt</code> 输入。</li>
+        <li>之后在 helper 的 prompt 文本框里写提示词。</li>
+      </ol>
+
+      <h2>图片顺序规则</h2>
+      <div class="grid">
+        <div class="card">
+          <strong>Resources_0</strong>
+          <p>对应 prompt 里的 <code>图片1</code></p>
+        </div>
+        <div class="card">
+          <strong>Resources_1</strong>
+          <p>对应 prompt 里的 <code>图片2</code></p>
+        </div>
+        <div class="card">
+          <strong>Resources_2</strong>
+          <p>对应 prompt 里的 <code>图片3</code></p>
+        </div>
+      </div>
+      <p>两边顺序必须一致。比如角色图在原 Seedance 资源节点里是第 1 张，那它也要接到 helper 的 <code>Resources_0</code>。</p>
+
+      <h2>怎么使用 @</h2>
+      <ol>
+        <li>在需要引用图片的位置输入 <code>@</code>。</li>
+        <li>弹出缩略图选择器。</li>
+        <li>点击对应图片。</li>
+        <li>helper 会插入带括号的引用，例如 <code>（图片1）</code>。</li>
+      </ol>
+
+      <h2>示例</h2>
+      <div class="panel">
+        <p>输入：</p>
+        <pre><code>@角色1@ 走进 @场景1@，手里拿着 @道具1@。</code></pre>
+        <p>依次选择图片后可能变成：</p>
+        <pre><code>@角色1（图片1） 走进 @场景1（图片3），手里拿着 @道具1（图片5）。</code></pre>
+      </div>
+
+      <h2>右上角 i 按钮</h2>
+      <p>helper 节点右上角有一个蓝色 <code>i</code> 图标，点击后会在 ComfyUI 内显示简短用法说明。</p>
+
+      <h2>常见问题</h2>
+      <div class="panel">
+        <p><strong>输入 @ 没有弹窗：</strong>刷新页面或重启 ComfyUI；确认安装的是最新版本。</p>
+        <p><strong>弹窗有图，但 Seedance 没按图生成：</strong>检查同一张图是否也接到了原 Seedance2.0 资源节点，并且顺序一致。</p>
+        <p><strong>为什么不是 Seedance 原生缩略图胶囊：</strong>独立 helper 拿不到原 Seedance2.0 私有富文本编辑器接口，所以采用稳定的 prompt 文本引用方式。</p>
+      </div>
+    </main>
+  </body>
+</html>
