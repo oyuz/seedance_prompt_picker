@@ -555,15 +555,16 @@ function installHelpIcon(node) {
   if (node.__seedancePromptPickerHelpInstalled) return;
   node.__seedancePromptPickerHelpInstalled = true;
 
-  const previousDrawForeground = node.onDrawForeground;
-  node.onDrawForeground = function seedancePromptPickerDrawHelp(ctx, ...args) {
-    previousDrawForeground?.call(this, ctx, ...args);
+  const iconRadius = 9;
+  const iconX = () => node.size[0] - 28;
+  const iconY = () => -14;
 
-    const x = this.size[0] - 24;
-    const y = 18;
+  const drawIcon = (ctx) => {
+    const x = iconX();
+    const y = iconY();
     ctx.save();
     ctx.beginPath();
-    ctx.arc(x, y, 9, 0, Math.PI * 2);
+    ctx.arc(x, y, iconRadius, 0, Math.PI * 2);
     ctx.fillStyle = "#2f80ed";
     ctx.fill();
     ctx.strokeStyle = "#9fc5ff";
@@ -577,13 +578,26 @@ function installHelpIcon(node) {
     ctx.restore();
   };
 
+  const previousDrawTitle = node.onDrawTitle;
+  node.onDrawTitle = function seedancePromptPickerDrawTitleHelp(ctx, ...args) {
+    previousDrawTitle?.call(this, ctx, ...args);
+    drawIcon(ctx);
+  };
+
+  const previousDrawForeground = node.onDrawForeground;
+  node.onDrawForeground = function seedancePromptPickerDrawHelp(ctx, ...args) {
+    previousDrawForeground?.call(this, ctx, ...args);
+    drawIcon(ctx);
+  };
+
   const previousMouseDown = node.onMouseDown;
   node.onMouseDown = function seedancePromptPickerHelpClick(event, localPos, ...args) {
-    const x = this.size[0] - 24;
-    const y = 18;
+    const x = iconX();
+    const y = iconY();
     const dx = localPos?.[0] - x;
     const dy = localPos?.[1] - y;
-    if (dx * dx + dy * dy <= 12 * 12) {
+    if (dx * dx + dy * dy <= 14 * 14) {
+      event?.preventDefault?.();
       showHelpPanel();
       return true;
     }

@@ -11,7 +11,7 @@ It does not change the Seedance generation code. It only enhances the prompt wid
 - Reads images connected to `Seedance2DResource` through `Resources_0`, `Resources_1`, etc.
 - The included `seedance2.0 @ picker helper` node also has `Resources_0` to `Resources_11` image inputs, so you can use it as a standalone prompt helper.
 - Clicking a thumbnail inserts a wrapped token such as `（图片1）`, `（图片2）`, etc. into the prompt.
-- Draws a small `i` help button on the helper node.
+- Draws a small `i` help button in the helper node title bar.
 
 The `@` is only a trigger. The inserted text is the plain token that the existing Seedance node already understands.
 
@@ -46,7 +46,7 @@ Important: this helper does not send images to Seedance by itself. It only write
 
 The helper cannot create Seedance's native rich image chips unless the original Seedance node exposes that private editor API. It deliberately writes normal prompt text so the existing Seedance2.0 node can still read it.
 
-Click the small `i` icon on the helper node to see these notes inside ComfyUI.
+Click the small `i` icon in the helper node title bar to see these notes inside ComfyUI.
 
 ## Notes
 
