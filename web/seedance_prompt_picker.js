@@ -27,8 +27,8 @@ function injectStyles() {
       left: 50%;
       top: 50%;
       transform: translate(-50%, -50%);
-      width: min(720px, calc(100vw - 48px));
-      max-height: min(620px, calc(100vh - 48px));
+      width: min(560px, calc(100vw - 48px));
+      max-height: min(520px, calc(100vh - 48px));
       overflow: hidden;
       border: 1px solid #3f444b;
       border-radius: 8px;
@@ -67,10 +67,10 @@ function injectStyles() {
 
     .seedance-picker-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(132px, 1fr));
-      gap: 10px;
-      padding: 12px;
-      max-height: 520px;
+      grid-template-columns: repeat(auto-fill, minmax(86px, 1fr));
+      gap: 8px;
+      padding: 10px;
+      max-height: 430px;
       overflow: auto;
     }
 
@@ -102,7 +102,7 @@ function injectStyles() {
     .seedance-picker-meta {
       padding: 8px;
       display: grid;
-      gap: 6px;
+      gap: 5px;
     }
 
     .seedance-picker-label {
@@ -110,7 +110,7 @@ function injectStyles() {
       white-space: nowrap;
       text-overflow: ellipsis;
       color: #cfd5dd;
-      font-size: 12px;
+      font-size: 10px;
     }
 
     .seedance-picker-actions {
@@ -119,13 +119,13 @@ function injectStyles() {
     }
 
     .seedance-picker-action {
-      min-height: 28px;
+      min-height: 24px;
       border: 0;
       border-radius: 6px;
       background: #3b82f6;
       color: white;
       cursor: pointer;
-      font-size: 12px;
+      font-size: 11px;
     }
 
     .seedance-picker-empty {
@@ -133,6 +133,21 @@ function injectStyles() {
       color: #cfd5dd;
       font-size: 13px;
       line-height: 1.5;
+    }
+
+    .seedance-help-body {
+      padding: 14px 16px 16px;
+      color: #d8dee8;
+      font-size: 13px;
+      line-height: 1.65;
+    }
+
+    .seedance-help-body code {
+      padding: 2px 5px;
+      border-radius: 5px;
+      background: #111318;
+      color: #f3f4f6;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
     }
   `;
   document.head.appendChild(style);
@@ -328,6 +343,7 @@ function getFallbackRange(value) {
 
 function getInsertText(token, range) {
   if (range?.mode === "appendParen") return `（${token}）`;
+  if (range?.mode === "replace") return `（${token}）`;
   if (range?.mode === "appendSpaced") return ` ${token}`;
   return token;
 }
@@ -445,6 +461,88 @@ function showPicker(node, widget, insertRange = null) {
   STATE.current = { node, widget };
 }
 
+function showHelpPanel() {
+  closePicker();
+  injectStyles();
+
+  const backdrop = document.createElement("div");
+  backdrop.className = "seedance-picker-backdrop";
+  backdrop.addEventListener("click", closePicker);
+
+  const panel = document.createElement("div");
+  panel.className = "seedance-picker-panel";
+  panel.addEventListener("click", (event) => event.stopPropagation());
+
+  const head = document.createElement("div");
+  head.className = "seedance-picker-head";
+
+  const title = document.createElement("div");
+  title.className = "seedance-picker-title";
+  title.textContent = "Seedance @ Picker 用法";
+
+  const close = document.createElement("button");
+  close.className = "seedance-picker-close";
+  close.type = "button";
+  close.textContent = "x";
+  close.addEventListener("click", closePicker);
+
+  const body = document.createElement("div");
+  body.className = "seedance-help-body";
+  body.innerHTML = [
+    "1. 同一批参考图要同时接到原 Seedance 资源节点和本 Helper 的 Resources 输入口。",
+    "2. 两边顺序必须一致：Resources_0 对应 <code>图片1</code>，Resources_1 对应 <code>图片2</code>。",
+    "3. 在 prompt 需要引用的位置输入 <code>@</code>，选择图片后会插入 <code>（图片1）</code>。",
+    "4. 例如写 <code>@角色1@</code> 后选择图片1，会变成 <code>@角色1（图片1）</code>。",
+    "5. 本 Helper 只输出 Seedance 能读的 prompt 文本；图片仍由原 Seedance 资源节点提供。",
+  ].join("<br>");
+
+  head.append(title, close);
+  panel.append(head, body);
+  backdrop.appendChild(panel);
+  document.body.appendChild(backdrop);
+  STATE.picker = backdrop;
+}
+
+function installHelpIcon(node) {
+  if (node.__seedancePromptPickerHelpInstalled) return;
+  node.__seedancePromptPickerHelpInstalled = true;
+
+  const previousDrawForeground = node.onDrawForeground;
+  node.onDrawForeground = function seedancePromptPickerDrawHelp(ctx, ...args) {
+    previousDrawForeground?.call(this, ctx, ...args);
+
+    const x = this.size[0] - 24;
+    const y = 18;
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(x, y, 9, 0, Math.PI * 2);
+    ctx.fillStyle = "#2f80ed";
+    ctx.fill();
+    ctx.strokeStyle = "#9fc5ff";
+    ctx.lineWidth = 1;
+    ctx.stroke();
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "bold 13px sans-serif";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText("i", x, y + 0.5);
+    ctx.restore();
+  };
+
+  const previousMouseDown = node.onMouseDown;
+  node.onMouseDown = function seedancePromptPickerHelpClick(event, localPos, ...args) {
+    const x = this.size[0] - 24;
+    const y = 18;
+    const dx = localPos?.[0] - x;
+    const dy = localPos?.[1] - y;
+    if (dx * dx + dy * dy <= 12 * 12) {
+      showHelpPanel();
+      return true;
+    }
+    return previousMouseDown?.call(this, event, localPos, ...args);
+  };
+}
+
 function shouldOpenPicker(previousValue, nextValue) {
   if (nextValue === previousValue) return false;
   if (!nextValue.endsWith("@")) return false;
@@ -472,18 +570,6 @@ function enhancePromptWidget(node, widget) {
   };
 }
 
-function addPickerButton(node, widget) {
-  if (node.__seedancePromptPickerButtonAdded || typeof node.addWidget !== "function") return;
-  node.__seedancePromptPickerButtonAdded = true;
-  node.addWidget("button", "@ 选择参考图", "open", () => {
-    const textarea = document.activeElement instanceof HTMLTextAreaElement ? document.activeElement : STATE.textarea;
-    const value = String(textarea?.value ?? widget.value ?? "");
-    const cursor = textarea?.selectionStart ?? value.length;
-    STATE.textarea = textarea || STATE.textarea;
-    showPicker(node, widget, findReferenceRange(value, cursor) || getFallbackRange(value));
-  });
-}
-
 function setupNode(node) {
   if (!isSeedancePromptNode(node)) return;
 
@@ -491,7 +577,7 @@ function setupNode(node) {
   if (!widget) return;
 
   enhancePromptWidget(node, widget);
-  addPickerButton(node, widget);
+  installHelpIcon(node);
 }
 
 function canvasPointFromElement(element) {
