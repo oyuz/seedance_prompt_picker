@@ -41,6 +41,8 @@ Recommended standalone helper flow:
 
 Keep the image order the same between `Seedance2DResource` and `Seedance @ Picker Helper`. For example, if the first image connected to `Seedance2DResource` is the character image, connect that same image to `Seedance @ Picker Helper` `Resources_0`.
 
+Important: this helper does not send images to Seedance by itself. It only writes the prompt text that your original Seedance nodes already understand. The real image resources must still be connected to your original Seedance resource node.
+
 ## Notes
 
 This is a best-effort frontend helper. Company-hosted ComfyUI builds may customize frontend internals, so the first version may need small adjustments if:

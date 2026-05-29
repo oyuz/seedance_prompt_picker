@@ -4,6 +4,7 @@ const EXTENSION_NAME = "seedance.prompt.thumbnail_picker";
 const STATE = {
   picker: null,
   current: null,
+  textarea: null,
 };
 
 function injectStyles() {
@@ -268,6 +269,12 @@ function setPromptValue(widget, nextValue) {
   widget.__seedancePickerUpdating = true;
   widget.value = nextValue;
 
+  if (STATE.textarea && "value" in STATE.textarea) {
+    STATE.textarea.value = nextValue;
+    STATE.textarea.dispatchEvent(new Event("input", { bubbles: true }));
+    STATE.textarea.focus();
+  }
+
   if (widget.inputEl && "value" in widget.inputEl) {
     widget.inputEl.value = nextValue;
     widget.inputEl.dispatchEvent(new Event("input", { bubbles: true }));
@@ -282,7 +289,7 @@ function setPromptValue(widget, nextValue) {
 }
 
 function insertToken(widget, token) {
-  const value = String(widget.value || "");
+  const value = String(STATE.textarea?.value ?? widget.value ?? "");
   const atIndex = value.lastIndexOf("@");
   const nextValue =
     atIndex >= 0
@@ -436,9 +443,82 @@ function setupNode(node) {
   addPickerButton(node, widget);
 }
 
+function canvasPointFromElement(element) {
+  const canvas = app?.canvas?.canvas;
+  if (!canvas || !element) return null;
+
+  const elementRect = element.getBoundingClientRect();
+  const canvasRect = canvas.getBoundingClientRect();
+  const screenX = elementRect.left + elementRect.width / 2 - canvasRect.left;
+  const screenY = elementRect.top + elementRect.height / 2 - canvasRect.top;
+  const ds = app.canvas.ds;
+
+  return [
+    screenX / ds.scale - ds.offset[0],
+    screenY / ds.scale - ds.offset[1],
+  ];
+}
+
+function nodeContainsPoint(node, point) {
+  if (!node || !point || !node.pos || !node.size) return false;
+  return (
+    point[0] >= node.pos[0] &&
+    point[0] <= node.pos[0] + node.size[0] &&
+    point[1] >= node.pos[1] &&
+    point[1] <= node.pos[1] + node.size[1]
+  );
+}
+
+function findNodeForTextarea(textarea) {
+  const graph = getGraph();
+  const nodes = graph?._nodes || [];
+  const point = canvasPointFromElement(textarea);
+
+  const containing = nodes
+    .filter((node) => isSeedancePromptNode(node) && nodeContainsPoint(node, point))
+    .sort((a, b) => (b.id || 0) - (a.id || 0));
+
+  if (containing.length) return containing[0];
+
+  return nodes.find((node) => {
+    if (!isSeedancePromptNode(node)) return false;
+    const widget = findPromptWidget(node);
+    return widget && String(widget.value || "") === String(textarea.value || "");
+  });
+}
+
+function openPickerForTextarea(textarea) {
+  const node = findNodeForTextarea(textarea);
+  const widget = findPromptWidget(node);
+  if (!node || !widget) return;
+
+  STATE.textarea = textarea;
+  widget.value = textarea.value;
+  showPicker(node, widget);
+}
+
+document.addEventListener(
+  "input",
+  (event) => {
+    const target = event.target;
+    if (!(target instanceof HTMLTextAreaElement)) return;
+    if (!String(target.value || "").endsWith("@")) return;
+
+    window.setTimeout(() => openPickerForTextarea(target), 0);
+  },
+  true
+);
+
 document.addEventListener("keydown", (event) => {
   if (event.key === "Escape") closePicker();
 });
+
+window.setInterval(() => {
+  const graph = getGraph();
+  for (const node of graph?._nodes || []) {
+    setupNode(node);
+  }
+}, 1500);
 
 app.registerExtension({
   name: EXTENSION_NAME,
