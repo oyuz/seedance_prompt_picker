@@ -5,6 +5,7 @@ const STATE = {
   picker: null,
   current: null,
   textarea: null,
+  insertRange: null,
 };
 
 function injectStyles() {
@@ -114,7 +115,6 @@ function injectStyles() {
 
     .seedance-picker-actions {
       display: grid;
-      grid-template-columns: 1fr 1fr;
       gap: 6px;
     }
 
@@ -126,10 +126,6 @@ function injectStyles() {
       color: white;
       cursor: pointer;
       font-size: 12px;
-    }
-
-    .seedance-picker-action.secondary {
-      background: #4b5563;
     }
 
     .seedance-picker-empty {
@@ -229,7 +225,6 @@ function collectFromResourceNode(resourceNode) {
       key: `${resourceNode.id}:${input.name}`,
       label: `${input.name} - ${nodeLabel(upstream)}`,
       imageToken: `图片${number}`,
-      sceneToken: `场景${number}`,
       thumb: getNodeThumbnail(upstream),
     };
   });
@@ -248,7 +243,6 @@ function collectVisibleImageNodes(peNode) {
         key: `visible:${node.id}`,
         label: nodeLabel(node),
         imageToken: `图片${index}`,
-        sceneToken: `场景${index}`,
         thumb: getNodeThumbnail(node),
       };
     });
@@ -288,15 +282,69 @@ function setPromptValue(widget, nextValue) {
   app.graph?.setDirtyCanvas?.(true, true);
 }
 
+function isTokenBoundary(char) {
+  return !char || /[\s|,，.。;；:：()[\]{}（）<>《》"'“”‘’]/.test(char);
+}
+
+function findReferenceRange(value, cursor) {
+  if (cursor > 0 && value[cursor - 1] === "@") {
+    return {
+      start: cursor - 1,
+      end: cursor,
+      mode: "replace",
+    };
+  }
+
+  const beforeCursor = value.slice(0, cursor);
+  const start = beforeCursor.lastIndexOf("@");
+  if (start < 0) return null;
+
+  for (let index = start + 1; index < cursor; index += 1) {
+    if (isTokenBoundary(value[index])) return null;
+  }
+
+  let end = cursor;
+  while (end < value.length && !isTokenBoundary(value[end])) {
+    end += 1;
+  }
+
+  if (end <= start + 1) return null;
+
+  return {
+    start: end,
+    end,
+    mode: "appendParen",
+  };
+}
+
+function getFallbackRange(value) {
+  const cursor = value.length;
+  return {
+    start: cursor,
+    end: cursor,
+    mode: value && !value.endsWith(" ") ? "appendSpaced" : "append",
+  };
+}
+
+function getInsertText(token, range) {
+  if (range?.mode === "appendParen") return `（${token}）`;
+  if (range?.mode === "appendSpaced") return ` ${token}`;
+  return token;
+}
+
 function insertToken(widget, token) {
   const value = String(STATE.textarea?.value ?? widget.value ?? "");
-  const atIndex = value.lastIndexOf("@");
-  const nextValue =
-    atIndex >= 0
-      ? `${value.slice(0, atIndex)}${token}${value.slice(atIndex + 1)}`
-      : `${value}${value && !value.endsWith(" ") ? " " : ""}${token}`;
+  const range = STATE.insertRange || getFallbackRange(value);
+  const insertText = getInsertText(token, range);
+  const nextValue = `${value.slice(0, range.start)}${insertText}${value.slice(range.end)}`;
 
   setPromptValue(widget, nextValue);
+
+  if (STATE.textarea) {
+    const nextCursor = range.start + insertText.length;
+    STATE.textarea.setSelectionRange?.(nextCursor, nextCursor);
+  }
+
   closePicker();
 }
 
@@ -305,12 +353,14 @@ function closePicker() {
     STATE.picker.remove();
     STATE.picker = null;
     STATE.current = null;
+    STATE.insertRange = null;
   }
 }
 
-function showPicker(node, widget) {
+function showPicker(node, widget, insertRange = null) {
   closePicker();
   injectStyles();
+  STATE.insertRange = insertRange;
 
   const refs = collectReferences(node);
   const backdrop = document.createElement("div");
@@ -380,13 +430,7 @@ function showPicker(node, widget) {
       imageButton.textContent = ref.imageToken;
       imageButton.addEventListener("click", () => insertToken(widget, ref.imageToken));
 
-      const sceneButton = document.createElement("button");
-      sceneButton.className = "seedance-picker-action secondary";
-      sceneButton.type = "button";
-      sceneButton.textContent = ref.sceneToken;
-      sceneButton.addEventListener("click", () => insertToken(widget, ref.sceneToken));
-
-      actions.append(imageButton, sceneButton);
+      actions.append(imageButton);
       meta.append(label, actions);
       card.appendChild(meta);
       grid.appendChild(card);
@@ -415,7 +459,8 @@ function enhancePromptWidget(node, widget) {
   const originalCallback = widget.callback;
   widget.callback = function seedancePromptPickerCallback(value, ...args) {
     if (!widget.__seedancePickerUpdating && shouldOpenPicker(widget.__seedancePromptPickerPreviousValue, String(value || ""))) {
-      window.setTimeout(() => showPicker(node, widget), 0);
+      const nextValue = String(value || "");
+      window.setTimeout(() => showPicker(node, widget, findReferenceRange(nextValue, nextValue.length) || getFallbackRange(nextValue)), 0);
     }
 
     widget.__seedancePromptPickerPreviousValue = String(value || "");
@@ -430,7 +475,13 @@ function enhancePromptWidget(node, widget) {
 function addPickerButton(node, widget) {
   if (node.__seedancePromptPickerButtonAdded || typeof node.addWidget !== "function") return;
   node.__seedancePromptPickerButtonAdded = true;
-  node.addWidget("button", "@ 选择参考图", "open", () => showPicker(node, widget));
+  node.addWidget("button", "@ 选择参考图", "open", () => {
+    const textarea = document.activeElement instanceof HTMLTextAreaElement ? document.activeElement : STATE.textarea;
+    const value = String(textarea?.value ?? widget.value ?? "");
+    const cursor = textarea?.selectionStart ?? value.length;
+    STATE.textarea = textarea || STATE.textarea;
+    showPicker(node, widget, findReferenceRange(value, cursor) || getFallbackRange(value));
+  });
 }
 
 function setupNode(node) {
@@ -494,15 +545,27 @@ function openPickerForTextarea(textarea) {
 
   STATE.textarea = textarea;
   widget.value = textarea.value;
-  showPicker(node, widget);
+  const cursor = textarea.selectionStart ?? textarea.value.length;
+  showPicker(node, widget, findReferenceRange(textarea.value, cursor) || getFallbackRange(textarea.value));
 }
+
+document.addEventListener(
+  "focusin",
+  (event) => {
+    if (event.target instanceof HTMLTextAreaElement) {
+      STATE.textarea = event.target;
+    }
+  },
+  true
+);
 
 document.addEventListener(
   "input",
   (event) => {
     const target = event.target;
     if (!(target instanceof HTMLTextAreaElement)) return;
-    if (!String(target.value || "").endsWith("@")) return;
+    const cursor = target.selectionStart ?? target.value.length;
+    if (target.value[cursor - 1] !== "@") return;
 
     window.setTimeout(() => openPickerForTextarea(target), 0);
   },
