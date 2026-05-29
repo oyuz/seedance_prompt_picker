@@ -7,6 +7,7 @@ It does not change the Seedance generation code. It only enhances the prompt wid
 ## What it does
 
 - When the prompt value ends with `@`, opens a thumbnail picker.
+- The thumbnail picker can be dragged by its title bar.
 - Reads images connected to `Seedance2DResource` through `Resources_0`, `Resources_1`, etc.
 - The included `seedance2.0 @ picker helper` node also has `Resources_0` to `Resources_11` image inputs, so you can use it as a standalone prompt helper.
 - Clicking a thumbnail inserts a wrapped token such as `（图片1）`, `（图片2）`, etc. into the prompt.

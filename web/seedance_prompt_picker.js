@@ -46,6 +46,8 @@ function injectStyles() {
       padding: 12px 14px;
       border-bottom: 1px solid #343941;
       background: #242832;
+      cursor: move;
+      user-select: none;
     }
 
     .seedance-picker-title {
@@ -373,6 +375,50 @@ function closePicker() {
   }
 }
 
+function clamp(value, min, max) {
+  return Math.min(Math.max(value, min), max);
+}
+
+function makePanelDraggable(panel, handle) {
+  let startX = 0;
+  let startY = 0;
+  let startLeft = 0;
+  let startTop = 0;
+
+  const beginDrag = (event) => {
+    if (event.button !== 0 || event.target.closest?.(".seedance-picker-close")) return;
+
+    const rect = panel.getBoundingClientRect();
+    panel.style.left = `${rect.left}px`;
+    panel.style.top = `${rect.top}px`;
+    panel.style.transform = "none";
+
+    startX = event.clientX;
+    startY = event.clientY;
+    startLeft = rect.left;
+    startTop = rect.top;
+
+    event.preventDefault();
+    document.addEventListener("mousemove", drag);
+    document.addEventListener("mouseup", endDrag, { once: true });
+  };
+
+  const drag = (event) => {
+    const width = panel.offsetWidth;
+    const height = panel.offsetHeight;
+    const nextLeft = clamp(startLeft + event.clientX - startX, 8, window.innerWidth - Math.min(80, width));
+    const nextTop = clamp(startTop + event.clientY - startY, 8, window.innerHeight - Math.min(80, height));
+    panel.style.left = `${nextLeft}px`;
+    panel.style.top = `${nextTop}px`;
+  };
+
+  const endDrag = () => {
+    document.removeEventListener("mousemove", drag);
+  };
+
+  handle.addEventListener("mousedown", beginDrag);
+}
+
 function showPicker(node, widget, insertRange = null) {
   closePicker();
   injectStyles();
@@ -389,6 +435,7 @@ function showPicker(node, widget, insertRange = null) {
 
   const head = document.createElement("div");
   head.className = "seedance-picker-head";
+  makePanelDraggable(panel, head);
 
   const title = document.createElement("div");
   title.className = "seedance-picker-title";
@@ -475,6 +522,7 @@ function showHelpPanel() {
 
   const head = document.createElement("div");
   head.className = "seedance-picker-head";
+  makePanelDraggable(panel, head);
 
   const title = document.createElement("div");
   title.className = "seedance-picker-title";
